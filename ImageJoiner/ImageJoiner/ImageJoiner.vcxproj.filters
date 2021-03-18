@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Base">
+      <UniqueIdentifier>{4dd6f9d3-3201-429c-b638-301f903f7edc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="View">
+      <UniqueIdentifier>{ccea0680-40b3-4bdc-8b4f-3eeba5a1d049}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="View\Dialog">
+      <UniqueIdentifier>{82f756bd-1f06-4f21-971a-73441e9e25da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="View\Dialog\Main">
+      <UniqueIdentifier>{d488a939-c1e8-4e14-b88b-7537878435f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Base\Res">
+      <UniqueIdentifier>{82fef120-4c84-49ee-9c11-6762227c1744}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Base\NewFilter1">
+      <UniqueIdentifier>{797ef9e4-6d8b-44ac-8b50-8782543ffcde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Global">
+      <UniqueIdentifier>{7728e80c-cbf4-47a8-9092-bc201358aa32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Global\Function">
+      <UniqueIdentifier>{43d361c5-2ab6-4b3e-ae5c-df2f9eb7e3a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Global\Variable">
+      <UniqueIdentifier>{aff572a3-22f0-4ff6-8f64-815e1eb7a912}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ImageJoinerDlg.h">
+      <Filter>View\Dialog\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Base</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageJoiner.h">
+      <Filter>Base</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Base\Res</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h">
+      <Filter>Global</Filter>
+    </ClInclude>
+    <ClInclude Include="GFunc.h">
+      <Filter>Global\Function</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ImageJoinerDlg.cpp">
+      <Filter>View\Dialog\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageJoiner.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="GFunc.cpp">
+      <Filter>Global\Function</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\ImageJoiner.ico">
+      <Filter>Base\Res</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ImageJoiner.rc">
+      <Filter>Base\Res</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\ImageJoiner.rc2">
+      <Filter>Base\Res</Filter>
+    </None>
+  </ItemGroup>
+</Project>
