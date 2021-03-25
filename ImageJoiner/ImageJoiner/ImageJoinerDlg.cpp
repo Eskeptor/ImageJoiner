@@ -191,6 +191,7 @@ void CImageJoinerDlg::OnBnClickedBtnFolderCheck()
 		if (m_vImgList.empty() == false)
 			m_vImgList.clear();
 
+		m_lBoxImg.ResetContent();
 		while (bIsFindPath)
 		{
 			bIsFindPath = fFind.FindNextFile();
@@ -206,16 +207,11 @@ void CImageJoinerDlg::OnBnClickedBtnFolderCheck()
 				strCurFileEx = strCurFile.Mid(strCurFile.ReverseFind(_T('.')) + 1);
 				if (strCurFileEx.Compare(_T("jpg")) == 0 ||
 					strCurFileEx.Compare(_T("png")) == 0)
-					m_vImgList.push_back(strCurFile);
+				{
+					m_lBoxImg.AddString(strCurFile);
+					m_vImgList.push_back(fFind.GetFilePath());
+				}
 			}
-		}
-
-		if (m_vImgList.empty() == false)
-		{
-			m_lBoxImg.ResetContent();
-			for_each(m_vImgList.begin(), m_vImgList.end(), [&](CString& str) {
-				m_lBoxImg.AddString(str);
-			});
 		}
 	}
 	else
@@ -231,7 +227,10 @@ void CImageJoinerDlg::OnBnClickedBtnFolderCheck()
 */
 void CImageJoinerDlg::OnBnClickedBtnCreate1()
 {
-	// https://m.blog.naver.com/PostView.nhn?blogId=tipsware&logNo=220367065310&proxyReferer=https:%2F%2Fwww.google.com%2F
+	if (ImageMerge(eMergeType::MergeHorizon))
+		MessageBox(_T("이미지를 저장하였습니다."), _T("저장 완료"));
+	else
+		MessageBox(_T("이미지 저장에 실패하였습니다."), _T("저장 실패"));
 }
 
 
@@ -240,7 +239,10 @@ void CImageJoinerDlg::OnBnClickedBtnCreate1()
 */
 void CImageJoinerDlg::OnBnClickedBtnCreate2()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (ImageMerge(eMergeType::MergeVertical))
+		MessageBox(_T("이미지를 저장하였습니다."), _T("저장 완료"));
+	else
+		MessageBox(_T("이미지 저장에 실패하였습니다."), _T("저장 실패"));
 }
 
 
@@ -250,4 +252,85 @@ void CImageJoinerDlg::OnBnClickedBtnCreate2()
 void CImageJoinerDlg::OnBnClickedBtnCreate3()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+
+/**
+이미지 합치는 함수
+@param		eType			Merge 타입
+*/
+bool CImageJoinerDlg::ImageMerge(eMergeType eType)
+{
+	if (eType <= eMergeType::MergeNone ||
+		eType >= eMergeType::MergeMax)
+		return false;
+
+	if (m_vImgList.empty() == false)
+	{
+		const int SIZE = m_vImgList.size();
+		CImage* arrImages = new CImage[SIZE];
+		HRESULT hResult = 0;
+		int nWidth = 0;
+		int nHeight = 0;
+
+		for (int i = 0; i < SIZE; i++)
+		{
+			hResult = arrImages[i].Load(m_vImgList.at(i));
+
+			if (FAILED(hResult))
+				break;
+
+			if (eType == eMergeType::MergeHorizon)
+			{
+				nWidth += arrImages[i].GetWidth();
+				if (nHeight < arrImages[i].GetHeight())
+					nHeight = arrImages[i].GetHeight();
+			}
+			else if (eType == eMergeType::MergeVertical)
+			{
+				nHeight += arrImages[i].GetHeight();
+				if (nWidth < arrImages[i].GetWidth())
+					nWidth = arrImages[i].GetWidth();
+			}
+		}
+
+		if (SUCCEEDED(hResult))
+		{
+			CImage newImg;
+			newImg.Create(nWidth, nHeight, arrImages[0].GetBPP());
+
+			int nCurAdder = 0;
+			HDC hNewImgHDC = newImg.GetDC();
+			HDC hImgHDC = NULL;
+			for (int i = 0; i < SIZE; i++)
+			{
+				hImgHDC = arrImages[i].GetDC();
+
+				if (eType == eMergeType::MergeHorizon)
+				{
+					::BitBlt(hNewImgHDC, nCurAdder, 0, arrImages[i].GetWidth(), nHeight, hImgHDC, 0, 0, SRCCOPY);
+					nCurAdder += arrImages[i].GetWidth();
+				}
+				else if (eType == eMergeType::MergeVertical)
+				{
+					::BitBlt(hNewImgHDC, 0, nCurAdder, nWidth, arrImages[i].GetHeight(), hImgHDC, 0, 0, SRCCOPY);
+					nCurAdder += arrImages[i].GetHeight();
+				}
+				arrImages[i].ReleaseDC();
+			}
+
+			newImg.Save(_T("Test.png"), Gdiplus::ImageFormatPNG);
+			newImg.ReleaseDC();
+		}
+
+		delete[] arrImages;
+		arrImages = nullptr;
+
+		if (SUCCEEDED(hResult))
+			return true;
+		else
+			return false;
+	}
+
+	return false;
 }

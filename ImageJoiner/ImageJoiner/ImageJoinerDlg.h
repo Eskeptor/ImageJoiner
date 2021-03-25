@@ -7,6 +7,17 @@ using namespace std;
 class CImageJoinerDlg : public CDialogEx
 {
 // 열거형 및 구조체 ===========================================================================
+private:
+	enum eMergeType
+	{
+		MergeNone = -1,
+		MergeHorizon,
+		MergeVertical,
+		MergeGrid,
+
+		MergeMax
+	};
+
 public:
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_IMAGEJOINER_DIALOG };
@@ -30,6 +41,8 @@ protected:
 // 함수 =====================================================================================
 private:
 	void InitControls();
+	
+	bool ImageMerge(eMergeType eType);
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
@@ -43,11 +56,12 @@ protected:
 public:
 	CImageJoinerDlg(CWnd* pParent = nullptr);
 
-// ==========================================================================================
-
 	afx_msg void OnBnClickedBtnFind();
 	afx_msg void OnBnClickedBtnFolderCheck();
 	afx_msg void OnBnClickedBtnCreate1();
 	afx_msg void OnBnClickedBtnCreate2();
 	afx_msg void OnBnClickedBtnCreate3();
+
+// ==========================================================================================
+
 };
