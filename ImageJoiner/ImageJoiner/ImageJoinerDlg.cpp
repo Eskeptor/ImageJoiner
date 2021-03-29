@@ -62,6 +62,7 @@ BEGIN_MESSAGE_MAP(CImageJoinerDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_CREATE_1, &CImageJoinerDlg::OnBnClickedBtnCreate1)
 	ON_BN_CLICKED(IDC_BTN_CREATE_2, &CImageJoinerDlg::OnBnClickedBtnCreate2)
 	ON_BN_CLICKED(IDC_BTN_CREATE_3, &CImageJoinerDlg::OnBnClickedBtnCreate3)
+	ON_BN_CLICKED(IDC_BTN_CREATOR, &CImageJoinerDlg::OnBnClickedBtnCreator)
 END_MESSAGE_MAP()
 
 
@@ -101,7 +102,13 @@ MFC 컨트롤 초기화
 */
 void CImageJoinerDlg::InitControls()
 {
-	m_lBoxImg.SubclassDlgItem(IDC_LIST_IMAGE, this);
+	if (m_lBoxImg.m_hWnd == NULL)
+		m_lBoxImg.SubclassDlgItem(IDC_LIST_IMAGE, this);
+
+	if (m_cboxGrid.m_hWnd == NULL)
+		m_cboxGrid.SubclassDlgItem(IDC_CBOX_GRID, this);
+
+	CreateButtonEnabler(FALSE);
 }
 
 
@@ -160,6 +167,10 @@ void CImageJoinerDlg::OnBnClickedBtnFind()
 	if (dlgPicker.DoModal() == IDOK)
 	{
 		SetDlgItemText(IDC_EDIT_PATH, dlgPicker.GetPathName());
+
+		m_lBoxImg.ResetContent();
+		m_cboxGrid.ResetContent();
+		CreateButtonEnabler(FALSE);
 	}
 }
 
@@ -178,7 +189,7 @@ void CImageJoinerDlg::OnBnClickedBtnFolderCheck()
 	}
 	
 	CString strFolderFindPath = _T("");
-	strFolderFindPath.Format(_T("%s\\*.*"), m_strFolderPath);
+	strFolderFindPath.Format(_T("%s\\*.*"), m_strFolderPath.GetString());
 
 	CFileFind fFind;
 	BOOL bIsFindPath = fFind.FindFile(strFolderFindPath);
@@ -213,6 +224,9 @@ void CImageJoinerDlg::OnBnClickedBtnFolderCheck()
 				}
 			}
 		}
+
+		CreateButtonEnabler(TRUE);
+		MakeComboList(m_vImgList.size());
 	}
 	else
 	{
@@ -251,7 +265,10 @@ void CImageJoinerDlg::OnBnClickedBtnCreate2()
 */
 void CImageJoinerDlg::OnBnClickedBtnCreate3()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if (ImageMerge(eMergeType::MergeGrid))
+		MessageBox(_T("이미지를 저장하였습니다."), _T("저장 완료"));
+	else
+		MessageBox(_T("이미지 저장에 실패하였습니다."), _T("저장 실패"));
 }
 
 
@@ -272,25 +289,63 @@ bool CImageJoinerDlg::ImageMerge(eMergeType eType)
 		HRESULT hResult = 0;
 		int nWidth = 0;
 		int nHeight = 0;
+		int nTempHeight = 0;
 
-		for (int i = 0; i < SIZE; i++)
+		if (eType == eMergeType::MergeGrid)					// 격자 붙이기
 		{
-			hResult = arrImages[i].Load(m_vImgList.at(i));
-
-			if (FAILED(hResult))
-				break;
-
-			if (eType == eMergeType::MergeHorizon)
+			int nTotalWidth = 0;
+			int nTotalHeight = 0;
+			int nCurSelGrid = m_cboxGrid.GetCurSel();
+			int nIdx = 0;
+			for (int nY = 0; nY < m_vGridType.at(nCurSelGrid).nY; nY++)
 			{
-				nWidth += arrImages[i].GetWidth();
-				if (nHeight < arrImages[i].GetHeight())
-					nHeight = arrImages[i].GetHeight();
+				for (int nX = 0; nX < m_vGridType.at(nCurSelGrid).nX; nX++)
+				{
+					nIdx = nY * m_vGridType.at(nCurSelGrid).nX + nX;
+					if (nIdx >= SIZE)
+						break;
+
+					hResult = arrImages[nIdx].Load(m_vImgList.at(nIdx));
+
+					if (FAILED(hResult))	
+						break;
+
+					nTotalWidth += arrImages[nIdx].GetWidth();
+					nTotalHeight = arrImages[nIdx].GetHeight();
+
+					if (nTempHeight < nTotalHeight)
+						nTempHeight = nTotalHeight;
+				}
+
+				if (nWidth < nTotalWidth)
+					nWidth = nTotalWidth;
+				nTotalWidth = 0;
+
+				nHeight += nTempHeight;
+				nTempHeight = 0;
 			}
-			else if (eType == eMergeType::MergeVertical)
+		}
+		else
+		{
+			for (int i = 0; i < SIZE; i++)
 			{
-				nHeight += arrImages[i].GetHeight();
-				if (nWidth < arrImages[i].GetWidth())
-					nWidth = arrImages[i].GetWidth();
+				hResult = arrImages[i].Load(m_vImgList.at(i));
+
+				if (FAILED(hResult))
+					break;
+
+				if (eType == eMergeType::MergeHorizon)				// 가로 붙이기
+				{
+					nWidth += arrImages[i].GetWidth();
+					if (nHeight < arrImages[i].GetHeight())
+						nHeight = arrImages[i].GetHeight();
+				}
+				else if (eType == eMergeType::MergeVertical)		// 세로 붙이기
+				{
+					nHeight += arrImages[i].GetHeight();
+					if (nWidth < arrImages[i].GetWidth())
+						nWidth = arrImages[i].GetWidth();
+				}
 			}
 		}
 
@@ -302,21 +357,56 @@ bool CImageJoinerDlg::ImageMerge(eMergeType eType)
 			int nCurAdder = 0;
 			HDC hNewImgHDC = newImg.GetDC();
 			HDC hImgHDC = NULL;
-			for (int i = 0; i < SIZE; i++)
-			{
-				hImgHDC = arrImages[i].GetDC();
 
-				if (eType == eMergeType::MergeHorizon)
+			if (eType == eMergeType::MergeGrid)				// 격자 붙이기
+			{
+				int nCurSelGrid = m_cboxGrid.GetCurSel();
+				int nIdx = 0;
+				int nCurXAdder = 0;
+				int nCurYAdder = 0;
+				int nBigAdder = 0;
+				for (int nY = 0; nY < m_vGridType.at(nCurSelGrid).nY; nY++)
 				{
-					::BitBlt(hNewImgHDC, nCurAdder, 0, arrImages[i].GetWidth(), nHeight, hImgHDC, 0, 0, SRCCOPY);
-					nCurAdder += arrImages[i].GetWidth();
+					for (int nX = 0; nX < m_vGridType.at(nCurSelGrid).nX; nX++)
+					{
+						nIdx = nY * m_vGridType.at(nCurSelGrid).nX + nX;
+						if (nIdx >= SIZE)
+							break;
+
+						hImgHDC = arrImages[nIdx].GetDC();
+
+						::BitBlt(hNewImgHDC, nCurXAdder, nCurYAdder, arrImages[nIdx].GetWidth(), arrImages[nIdx].GetHeight(), hImgHDC, 0, 0, SRCCOPY);
+						nCurXAdder += arrImages[nIdx].GetWidth();
+
+						if (nBigAdder < arrImages[nIdx].GetHeight())
+							nBigAdder = arrImages[nIdx].GetHeight();
+
+						arrImages[nIdx].ReleaseDC();
+					}
+
+					nCurXAdder = 0;
+					nCurYAdder += nBigAdder;
+					nBigAdder = 0;
 				}
-				else if (eType == eMergeType::MergeVertical)
+			}
+			else
+			{
+				for (int i = 0; i < SIZE; i++)
 				{
-					::BitBlt(hNewImgHDC, 0, nCurAdder, nWidth, arrImages[i].GetHeight(), hImgHDC, 0, 0, SRCCOPY);
-					nCurAdder += arrImages[i].GetHeight();
+					hImgHDC = arrImages[i].GetDC();
+
+					if (eType == eMergeType::MergeHorizon)			// 가로 붙이기
+					{
+						::BitBlt(hNewImgHDC, nCurAdder, 0, arrImages[i].GetWidth(), nHeight, hImgHDC, 0, 0, SRCCOPY);
+						nCurAdder += arrImages[i].GetWidth();
+					}
+					else if (eType == eMergeType::MergeVertical)	// 세로 붙이기
+					{
+						::BitBlt(hNewImgHDC, 0, nCurAdder, nWidth, arrImages[i].GetHeight(), hImgHDC, 0, 0, SRCCOPY);
+						nCurAdder += arrImages[i].GetHeight();
+					}
+					arrImages[i].ReleaseDC();
 				}
-				arrImages[i].ReleaseDC();
 			}
 
 			newImg.Save(_T("Test.png"), Gdiplus::ImageFormatPNG);
@@ -333,4 +423,68 @@ bool CImageJoinerDlg::ImageMerge(eMergeType eType)
 	}
 
 	return false;
+}
+
+
+/**
+붙이기 버튼을 활성화 또는 비활성화 하는 함수
+@param		bIsEnable		활성화 혹은 비활성화
+*/
+void CImageJoinerDlg::CreateButtonEnabler(BOOL bIsEnable)
+{
+	GetDlgItem(IDC_BTN_CREATE_1)->EnableWindow(bIsEnable);
+	GetDlgItem(IDC_BTN_CREATE_2)->EnableWindow(bIsEnable);
+	GetDlgItem(IDC_BTN_CREATE_3)->EnableWindow(bIsEnable);
+}
+
+
+/**
+이미지 개수에 맞게 Grid 타입을 ComboBox 목록에 추가하는 함수
+@param		nImgCnt			이미지 개수
+*/
+void CImageJoinerDlg::MakeComboList(int nImgCnt)
+{
+	if (nImgCnt <= 0)
+		return;
+
+	if (m_vGridType.empty() == false)
+		m_vGridType.clear();
+
+	m_cboxGrid.ResetContent();
+
+	int nX = 0;
+	int nY = 0;
+	stGridType stGrid;
+	CString strTemp = _T("");
+	for (int i = 0; i < nImgCnt; i++)
+	{
+		nX = i + 1;
+		nY = nImgCnt / nX;
+		if (nX * nY < nImgCnt)
+			nY += 1;
+
+		strTemp.Format(_T("%d x %d"), nX, nY);
+		m_cboxGrid.AddString(strTemp);
+
+		stGrid.nX = nX;
+		stGrid.nY = nY;
+		m_vGridType.push_back(stGrid);
+	}
+
+	m_cboxGrid.SetCurSel(0);
+}
+
+
+/**
+버튼 - 개발자
+*/
+void CImageJoinerDlg::OnBnClickedBtnCreator()
+{
+	TCHAR chBrowser[MAX_PATH] = { 0, };
+	HFILE h = _lcreat("dummy.html", 0);
+	_lclose(h);
+	FindExecutable(_T("dummy.html"), NULL, chBrowser);
+	DeleteFile(_T("dummy.html"));
+
+	ShellExecute(this->m_hWnd, _T("open"), chBrowser, _T("https://github.com/eskeptor"), NULL, SW_SHOW);
 }

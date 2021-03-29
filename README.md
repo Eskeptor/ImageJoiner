@@ -6,9 +6,10 @@
  1) Combine all images in a folder into one image.
  2) C++ (MFC)
 ```
-## What's New? (Last updated 2021.03.25)
+## What's New? (Last updated 2021.03.29)
 ```
- 1) Add Image Merge (Horizon, Vertical)
+ 1) Add Image Merge (Grid)
+ 2) Release
 ```
 ## Lasted Update List
 [View Lists](./UPDATE.md)
