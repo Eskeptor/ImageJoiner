@@ -7,10 +7,10 @@
  1) Combine all images in a folder into one image.
  2) C++ (MFC)
 ```
-## What's New? (Last updated 2021.03.29)
+## What's New? (Last updated 2021.04.05)
 ```
- 1) Add Image Merge (Grid)
- 2) Release
+ 1) Add Save Image Format (PNG, JPG, BMP)
+ 2) Add Save Image Path
 ```
 ## Lasted Update List
 [View Lists](./UPDATE.md)

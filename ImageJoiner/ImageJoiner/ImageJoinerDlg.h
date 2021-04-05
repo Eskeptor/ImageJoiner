@@ -54,7 +54,8 @@ private:
 	void CreateButtonEnabler(BOOL bIsEnable);
 	void MakeComboList(int nImgCnt);
 	
-	bool ImageMerge(eMergeType eType);
+	void ImageSave(eMergeType eType);
+	bool ImageMerge(eMergeType eType, CString strSavePath, GUID imgFormat);
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
@@ -73,8 +74,8 @@ public:
 	afx_msg void OnBnClickedBtnCreate1();
 	afx_msg void OnBnClickedBtnCreate2();
 	afx_msg void OnBnClickedBtnCreate3();
+	afx_msg void OnBnClickedBtnCreator();
 
 // ==========================================================================================
 
-	afx_msg void OnBnClickedBtnCreator();
 };

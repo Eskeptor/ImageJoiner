@@ -241,10 +241,11 @@ void CImageJoinerDlg::OnBnClickedBtnFolderCheck()
 */
 void CImageJoinerDlg::OnBnClickedBtnCreate1()
 {
-	if (ImageMerge(eMergeType::MergeHorizon))
-		MessageBox(_T("이미지를 저장하였습니다."), _T("저장 완료"));
-	else
-		MessageBox(_T("이미지 저장에 실패하였습니다."), _T("저장 실패"));
+	ImageSave(eMergeType::MergeHorizon);
+	//if (ImageMerge(eMergeType::MergeHorizon))
+	//	MessageBox(_T("이미지를 저장하였습니다."), _T("저장 완료"));
+	//else
+	//	MessageBox(_T("이미지 저장에 실패하였습니다."), _T("저장 실패"));
 }
 
 
@@ -253,10 +254,11 @@ void CImageJoinerDlg::OnBnClickedBtnCreate1()
 */
 void CImageJoinerDlg::OnBnClickedBtnCreate2()
 {
-	if (ImageMerge(eMergeType::MergeVertical))
-		MessageBox(_T("이미지를 저장하였습니다."), _T("저장 완료"));
-	else
-		MessageBox(_T("이미지 저장에 실패하였습니다."), _T("저장 실패"));
+	ImageSave(eMergeType::MergeVertical);
+	//if (ImageMerge(eMergeType::MergeVertical))
+	//	MessageBox(_T("이미지를 저장하였습니다."), _T("저장 완료"));
+	//else
+	//	MessageBox(_T("이미지 저장에 실패하였습니다."), _T("저장 실패"));
 }
 
 
@@ -265,21 +267,58 @@ void CImageJoinerDlg::OnBnClickedBtnCreate2()
 */
 void CImageJoinerDlg::OnBnClickedBtnCreate3()
 {
-	if (ImageMerge(eMergeType::MergeGrid))
-		MessageBox(_T("이미지를 저장하였습니다."), _T("저장 완료"));
-	else
-		MessageBox(_T("이미지 저장에 실패하였습니다."), _T("저장 실패"));
+	ImageSave(eMergeType::MergeGrid);
+	//if (ImageMerge(eMergeType::MergeGrid))
+	//	MessageBox(_T("이미지를 저장하였습니다."), _T("저장 완료"));
+	//else
+	//	MessageBox(_T("이미지 저장에 실패하였습니다."), _T("저장 실패"));
+}
+
+
+/**
+이미지를 저장하는 함수
+@param		eType			Merge 타입
+*/
+void CImageJoinerDlg::ImageSave(eMergeType eType)
+{
+	if (eType <= eMergeType::MergeNone ||
+		eType >= eMergeType::MergeMax)
+		return;
+
+	const LPCTSTR STR_FILTER = _T("PNG File (*.png)|*.png|JPG File (*.jpg)|*.jpg|BMP File (*.bmp)|*.bmp||");
+	CFileDialog dlgSave(FALSE, _T("png"), _T("MergeImage"), 0, STR_FILTER, this);
+	if (dlgSave.DoModal() == IDOK)
+	{
+		bool bResult = false;
+		CString strExt = dlgSave.GetFileExt();
+		if (strExt.Compare(_T("png")) == 0)
+			bResult = ImageMerge(eType, dlgSave.GetPathName(), Gdiplus::ImageFormatPNG);
+		else if (strExt.Compare(_T("jpg")) == 0)
+			bResult = ImageMerge(eType, dlgSave.GetPathName(), Gdiplus::ImageFormatJPEG);
+		else if (strExt.Compare(_T("bmp")) == 0)
+			bResult = ImageMerge(eType, dlgSave.GetPathName(), Gdiplus::ImageFormatBMP);
+
+		if (bResult)
+			MessageBox(_T("이미지를 저장하였습니다."), _T("저장 완료"));
+		else
+			MessageBox(_T("이미지 저장에 실패하였습니다."), _T("저장 실패"));
+	}
 }
 
 
 /**
 이미지 합치는 함수
 @param		eType			Merge 타입
+@param		strSavePath		파일 저장 경로
+@param		imgFormat		이미지 저장 포멧
 */
-bool CImageJoinerDlg::ImageMerge(eMergeType eType)
+bool CImageJoinerDlg::ImageMerge(eMergeType eType, CString strSavePath, GUID imgFormat)
 {
 	if (eType <= eMergeType::MergeNone ||
 		eType >= eMergeType::MergeMax)
+		return false;
+
+	if (strSavePath.IsEmpty())
 		return false;
 
 	if (m_vImgList.empty() == false)
@@ -409,7 +448,7 @@ bool CImageJoinerDlg::ImageMerge(eMergeType eType)
 				}
 			}
 
-			newImg.Save(_T("Test.png"), Gdiplus::ImageFormatPNG);
+			newImg.Save(strSavePath, imgFormat);
 			newImg.ReleaseDC();
 		}
 

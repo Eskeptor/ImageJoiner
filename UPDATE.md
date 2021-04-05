@@ -1,3 +1,9 @@
+## Update 2021.04.05 - Build 1.0.0.1
+```
+ 1) Add Save Image Format (PNG, JPG, BMP)
+ 2) Add Save Image Path
+```
+
 ## Update 2021.03.29 - Build 1.0.0.0
 ```
  1) Add Image Merge (Grid)
