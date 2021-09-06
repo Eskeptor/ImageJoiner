@@ -29,6 +29,8 @@
 #include <afxcontrolbars.h>     // MFC의 리본 및 컨트롤 막대 지원
 
 
+// Program Version
+#pragma comment (lib, "version.lib")
 
 #include "GFunc.h"
 

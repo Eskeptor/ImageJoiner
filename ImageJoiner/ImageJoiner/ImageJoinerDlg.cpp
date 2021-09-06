@@ -14,7 +14,6 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg();
 
-// 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
@@ -22,7 +21,6 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);  
 
-// 구현입니다.
 protected:
 	DECLARE_MESSAGE_MAP()
 };
@@ -63,10 +61,13 @@ BEGIN_MESSAGE_MAP(CImageJoinerDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_CREATE_2, &CImageJoinerDlg::OnBnClickedBtnCreate2)
 	ON_BN_CLICKED(IDC_BTN_CREATE_3, &CImageJoinerDlg::OnBnClickedBtnCreate3)
 	ON_BN_CLICKED(IDC_BTN_CREATOR, &CImageJoinerDlg::OnBnClickedBtnCreator)
+	ON_WM_DROPFILES()
 END_MESSAGE_MAP()
 
 
-
+/**
+OnInitDialog()
+*/
 BOOL CImageJoinerDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
@@ -98,20 +99,43 @@ BOOL CImageJoinerDlg::OnInitDialog()
 
 
 /**
-MFC 컨트롤 초기화
+MFC Control Init
+@access		private
+@param
+@return
 */
 void CImageJoinerDlg::InitControls()
 {
-	if (m_lBoxImg.m_hWnd == NULL)
-		m_lBoxImg.SubclassDlgItem(IDC_LIST_IMAGE, this);
+	// ListBox Init
+	{
+		if (m_lBoxImg.m_hWnd == NULL)
+			m_lBoxImg.SubclassDlgItem(IDC_LIST_IMAGE, this);
+	}
 
-	if (m_cboxGrid.m_hWnd == NULL)
-		m_cboxGrid.SubclassDlgItem(IDC_CBOX_GRID, this);
+	// ComboBox Init
+	{
+		if (m_cboxGrid.m_hWnd == NULL)
+			m_cboxGrid.SubclassDlgItem(IDC_CBOX_GRID, this);
+	}
 
-	CreateButtonEnabler(FALSE);
+	// Create Button Init
+	{
+		CreateButtonEnabler(FALSE);
+	}
+
+	// Title Init
+	{
+		CString strTitle = _T("");
+		GetWindowText(strTitle);
+		strTitle.AppendFormat(_T(" %s"), GetProgVersion());
+		SetWindowText(strTitle);
+	}
 }
 
 
+/**
+OnSysCommand()
+*/
 void CImageJoinerDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
 	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
@@ -126,6 +150,9 @@ void CImageJoinerDlg::OnSysCommand(UINT nID, LPARAM lParam)
 }
 
 
+/**
+OnPaint()
+*/
 void CImageJoinerDlg::OnPaint()
 {
 	if (IsIconic())
@@ -152,6 +179,9 @@ void CImageJoinerDlg::OnPaint()
 }
 
 
+/**
+OnQueryDragIcon()
+*/
 HCURSOR CImageJoinerDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
@@ -159,7 +189,7 @@ HCURSOR CImageJoinerDlg::OnQueryDragIcon()
 
 
 /**
-버튼 - 폴더 경로 (...)
+Button - Folder Path - ...
 */
 void CImageJoinerDlg::OnBnClickedBtnFind()
 {
@@ -176,7 +206,7 @@ void CImageJoinerDlg::OnBnClickedBtnFind()
 
 
 /**
-버튼 - 폴더 경로 (확인)
+Button - Folder Path - OK
 */
 void CImageJoinerDlg::OnBnClickedBtnFolderCheck()
 {
@@ -184,7 +214,7 @@ void CImageJoinerDlg::OnBnClickedBtnFolderCheck()
 
 	if (m_strFolderPath.IsEmpty())
 	{
-		MessageBox(_T("폴더 경로가 잘못되었습니다."), _T("경고"));
+		MessageBox(_T("Wrong folder path."), _T("Warning"));
 		return;
 	}
 	
@@ -226,58 +256,48 @@ void CImageJoinerDlg::OnBnClickedBtnFolderCheck()
 		}
 
 		CreateButtonEnabler(TRUE);
-		MakeComboList(m_vImgList.size());
+		MakeComboList((int)m_vImgList.size());
 	}
 	else
 	{
-		MessageBox(_T("폴더가 존재하지 않습니다."), _T("경고"));
+		MessageBox(_T("Not exist folder."), _T("Warning"));
 		return;
 	}
 }
 
 
 /**
-버튼 - 가로 붙이기
+Button - Horizontal Attach
 */
 void CImageJoinerDlg::OnBnClickedBtnCreate1()
 {
 	ImageSave(eMergeType::MergeHorizon);
-	//if (ImageMerge(eMergeType::MergeHorizon))
-	//	MessageBox(_T("이미지를 저장하였습니다."), _T("저장 완료"));
-	//else
-	//	MessageBox(_T("이미지 저장에 실패하였습니다."), _T("저장 실패"));
 }
 
 
 /**
-버튼 - 세로 붙이기
+Button - Vertical Attach
 */
 void CImageJoinerDlg::OnBnClickedBtnCreate2()
 {
 	ImageSave(eMergeType::MergeVertical);
-	//if (ImageMerge(eMergeType::MergeVertical))
-	//	MessageBox(_T("이미지를 저장하였습니다."), _T("저장 완료"));
-	//else
-	//	MessageBox(_T("이미지 저장에 실패하였습니다."), _T("저장 실패"));
 }
 
 
 /**
-버튼 - 격자 붙이기
+Button - Grid Attach
 */
 void CImageJoinerDlg::OnBnClickedBtnCreate3()
 {
 	ImageSave(eMergeType::MergeGrid);
-	//if (ImageMerge(eMergeType::MergeGrid))
-	//	MessageBox(_T("이미지를 저장하였습니다."), _T("저장 완료"));
-	//else
-	//	MessageBox(_T("이미지 저장에 실패하였습니다."), _T("저장 실패"));
 }
 
 
 /**
-이미지를 저장하는 함수
-@param		eType			Merge 타입
+Image Save
+@access		private
+@param		eType			Merge Type
+@return
 */
 void CImageJoinerDlg::ImageSave(eMergeType eType)
 {
@@ -299,18 +319,20 @@ void CImageJoinerDlg::ImageSave(eMergeType eType)
 			bResult = ImageMerge(eType, dlgSave.GetPathName(), Gdiplus::ImageFormatBMP);
 
 		if (bResult)
-			MessageBox(_T("이미지를 저장하였습니다."), _T("저장 완료"));
+			MessageBox(_T("Image Save Complete."), _T("Save"));
 		else
-			MessageBox(_T("이미지 저장에 실패하였습니다."), _T("저장 실패"));
+			MessageBox(_T("Image Save Failed."), _T("Save"));
 	}
 }
 
 
 /**
-이미지 합치는 함수
-@param		eType			Merge 타입
-@param		strSavePath		파일 저장 경로
-@param		imgFormat		이미지 저장 포멧
+Image Merge
+@access		private
+@param		eType			Merge Type
+@param		strSavePath		File Save Path
+@param		imgFormat		Image Format
+@return		true / false
 */
 bool CImageJoinerDlg::ImageMerge(eMergeType eType, CString strSavePath, GUID imgFormat)
 {
@@ -323,7 +345,7 @@ bool CImageJoinerDlg::ImageMerge(eMergeType eType, CString strSavePath, GUID img
 
 	if (m_vImgList.empty() == false)
 	{
-		const int SIZE = m_vImgList.size();
+		const int SIZE = (int)m_vImgList.size();
 		CImage* arrImages = new CImage[SIZE];
 		HRESULT hResult = 0;
 		int nWidth = 0;
@@ -466,8 +488,10 @@ bool CImageJoinerDlg::ImageMerge(eMergeType eType, CString strSavePath, GUID img
 
 
 /**
-붙이기 버튼을 활성화 또는 비활성화 하는 함수
-@param		bIsEnable		활성화 혹은 비활성화
+Function that enables or disables the create button
+@access		private
+@param		bIsEnable		Enable or Disable
+@return
 */
 void CImageJoinerDlg::CreateButtonEnabler(BOOL bIsEnable)
 {
@@ -478,8 +502,10 @@ void CImageJoinerDlg::CreateButtonEnabler(BOOL bIsEnable)
 
 
 /**
-이미지 개수에 맞게 Grid 타입을 ComboBox 목록에 추가하는 함수
-@param		nImgCnt			이미지 개수
+Function to add Grid type to ComboBox list for image count
+@access		private
+@param		nImgCnt			Image Count
+@return
 */
 void CImageJoinerDlg::MakeComboList(int nImgCnt)
 {
@@ -515,7 +541,49 @@ void CImageJoinerDlg::MakeComboList(int nImgCnt)
 
 
 /**
-버튼 - 개발자
+Get Program Version
+@access		private
+@param
+@return		Program version
+*/
+CString CImageJoinerDlg::GetProgVersion()
+{
+	CString strVersion = _T("");
+
+	TCHAR szPath[MAX_PATH] = { 0, };
+	GetModuleFileName(AfxGetInstanceHandle(), szPath, MAX_PATH);
+
+	DWORD dwVersionHandle = 0;
+	DWORD dwVersionInfoSize = GetFileVersionInfoSize(szPath, &dwVersionHandle);
+	HANDLE hMemory = GlobalAlloc(GMEM_MOVEABLE, dwVersionInfoSize);
+	if (hMemory != nullptr)
+	{
+		LPVOID pInfoMemory = GlobalLock(hMemory);
+
+		if (pInfoMemory != nullptr &&
+			dwVersionHandle == 0)
+		{
+			GetFileVersionInfo(szPath, dwVersionHandle, dwVersionInfoSize, pInfoMemory);
+
+			TCHAR* pData = nullptr;
+			UINT nDataSize = 0;
+
+			if (VerQueryValue(pInfoMemory, _T("\\StringFileInfo\\041204b0\\FileVersion"), (void**)&pData, &nDataSize))
+			{
+				strVersion.Format(_T("%s"), pData);
+			}
+		}
+
+		GlobalUnlock(hMemory);
+		GlobalFree(hMemory);
+	}
+
+	return strVersion;
+}
+
+
+/**
+Button - Developer
 */
 void CImageJoinerDlg::OnBnClickedBtnCreator()
 {
@@ -526,4 +594,57 @@ void CImageJoinerDlg::OnBnClickedBtnCreator()
 	DeleteFile(_T("dummy.html"));
 
 	ShellExecute(this->m_hWnd, _T("open"), chBrowser, _T("https://github.com/eskeptor"), NULL, SW_SHOW);
+}
+
+
+/**
+File Drag and Drop
+*/
+void CImageJoinerDlg::OnDropFiles(HDROP hDropInfo)
+{
+	TCHAR szFileName[MAX_PATH] = { 0, };
+	int nCount = ::DragQueryFile(hDropInfo, 0xFFFFFFFF, szFileName, sizeof(szFileName) / sizeof(TCHAR));
+
+	if (nCount > 0)
+	{
+		CString strFullPath = _T("");
+		CString strCurFile = _T("");
+		CString strCurFileEx = _T("");
+
+		if (m_vImgList.empty() == false)
+			m_vImgList.clear();
+
+		m_lBoxImg.ResetContent();
+		for (int i = 0; i < nCount; i++)
+		{
+			memset(szFileName, 0, MAX_PATH);
+			::DragQueryFile(hDropInfo, i, szFileName, sizeof(szFileName) / sizeof(TCHAR));
+
+			strFullPath.Format(_T("%s"), szFileName);
+			strCurFile = strFullPath.Mid(strFullPath.ReverseFind(_T('\\')) + 1);
+			if (strCurFile.Compare(_T(".")) == 0 ||
+				strCurFile.Compare(_T("..")) == 0 ||
+				strCurFile.Compare(_T("Thumbs.db")) == 0)
+				continue;
+
+			strCurFileEx = strCurFile.Mid(strCurFile.ReverseFind(_T('.')) + 1);
+			if (strCurFileEx.Compare(_T("jpg")) == 0 ||
+				strCurFileEx.Compare(_T("png")) == 0)
+			{
+				m_lBoxImg.AddString(strCurFile);
+				m_vImgList.push_back(strFullPath);
+			}
+		}
+
+		CreateButtonEnabler(TRUE);
+		MakeComboList((int)m_vImgList.size());
+	}
+	else
+	{
+		MessageBox(_T("Not exist folder."), _T("Warning"));
+	}
+
+	::DragFinish(hDropInfo);
+
+	CDialogEx::OnDropFiles(hDropInfo);
 }

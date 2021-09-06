@@ -7,10 +7,9 @@
  1) Combine all images in a folder into one image.
  2) C++ (MFC)
 ```
-## What's New? (Last updated 2021.04.05)
+## What's New? (Last updated 2021.09.06)
 ```
- 1) Add Save Image Format (PNG, JPG, BMP)
- 2) Add Save Image Path
+ 1) Add Drag and Drop
 ```
 ## Lasted Update List
 [View Lists](./UPDATE.md)
@@ -21,7 +20,14 @@
  CPU : AMD Ryzen R5 3600
  RAM : 32GB
  VGA : AMD Radeon RX 5700 XT
- IDE : Visual Studio 2019 Community 16.7.6
+ IDE : Visual Studio 2019 Community 16.11.2
+```
+```
+ Operating System : Windows 10 Pro 64bit
+ CPU : Intel i5-8250U
+ RAM : 8GB
+ VGA : Intel UHD 620
+ IDE : Visual Studio 2019 Community 16.11.2
 ```
 
 ## License
@@ -39,4 +45,4 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ## Good Bye!!
-Compiled by Visual Studio 2019 Community 16.7.6
+Compiled by Visual Studio 2019 Community 16.11.2

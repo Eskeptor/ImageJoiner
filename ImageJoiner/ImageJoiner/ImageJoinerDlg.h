@@ -1,12 +1,13 @@
 ﻿#pragma once
 #include <vector>
 #include <algorithm>
+
 using namespace std;
 
 
 class CImageJoinerDlg : public CDialogEx
 {
-// 열거형 및 구조체 ===========================================================================
+// Enum and Struct ===========================================================================
 private:
 	enum class eMergeType
 	{
@@ -18,10 +19,10 @@ private:
 		MergeMax
 	};
 
-	struct stGridType		// 격자 붙이기 구조체
+	struct stGridType		// Grid Attach Struct
 	{
-		int nX;		// 가로 개수
-		int nY;		// 세로 개수
+		int nX;		// Horiziontal Length
+		int nY;		// Vertical Length
 		stGridType(int nX = 0, int nY = 0) : nX(nX), nY(nY) {}
 	};
 
@@ -33,28 +34,37 @@ public:
 // ==========================================================================================
 
 
-// 멤버 변수 =================================================================================
+// Member ===================================================================================
 private:
-	CString m_strFolderPath;			// 이미지가 있는 폴더의 경로
-	vector<CString> m_vImgList;			// 이미지 리스트를 저장하는 벡트
+	CString m_strFolderPath;			// Path to the folder where the image resides
+	vector<CString> m_vImgList;			// Vectors that store the list of images
 
-	CListBox m_lBoxImg;					// 파일 리스트
+	CListBox m_lBoxImg;					// File list
 
-	vector<stGridType> m_vGridType;		// 격자 붙이기에서 사용하는 벡터
-	CComboBox m_cboxGrid;
+	vector<stGridType> m_vGridType;		// Vectors used by Grid attachment
+	CComboBox m_cboxGrid;				// Grid attach ComboBox
 
 protected:
 	HICON m_hIcon;
+
 // ==========================================================================================
 
 
-// 함수 =====================================================================================
+// Function =================================================================================
 private:
+	// MFC Control Init
 	void InitControls();
+	// Function that enables or disables the create button
 	void CreateButtonEnabler(BOOL bIsEnable);
+	// Function to add Grid type to ComboBox list for image count
 	void MakeComboList(int nImgCnt);
+
+	// Get Program Version
+	CString GetProgVersion();
 	
+	// Image Save
 	void ImageSave(eMergeType eType);
+	// Image Merge
 	bool ImageMerge(eMergeType eType, CString strSavePath, GUID imgFormat);
 
 protected:
@@ -75,6 +85,7 @@ public:
 	afx_msg void OnBnClickedBtnCreate2();
 	afx_msg void OnBnClickedBtnCreate3();
 	afx_msg void OnBnClickedBtnCreator();
+	afx_msg void OnDropFiles(HDROP hDropInfo);
 
 // ==========================================================================================
 
